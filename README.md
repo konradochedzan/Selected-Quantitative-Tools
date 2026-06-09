@@ -576,15 +576,7 @@ The annualized Sortino ratio replaces total volatility by downside volatility:
 Sortino
 =
 \sqrt{252}
-\frac{
-\mathbb{E}[r_t^{strat}-r_f/252]
-}{
-\mathrm{Std}
-\left(
-(r_t^{strat}-r_f/252)
-\mathbf{1}_{r_t^{strat}<r_f/252}
-\right)
-}.
+\frac{\mathbb{E}[r_t^{strat}-r_f/252]}{\mathrm{Std}\left((r_t^{strat}-r_f/252)\mathbf{1}_{r_t^{strat}<r_f/252}\right)}.
 ```
 
 Forecast differences are tested with the Diebold-Mariano statistic. For two models with errors $e_{1,t}=y_t-\hat{y}_{1,t}$ and $e_{2,t}=y_t-\hat{y}_{2,t}$, define squared-error loss differential
