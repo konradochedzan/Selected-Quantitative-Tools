@@ -59,11 +59,11 @@ For a rolling window, the training window has fixed length and moves forward:
 ```math
 \mathcal{T}^{roll}_k
 =
-\{t:s_k-W_{train}\le t<s_k\},
+\{t:s_k-W_{train}\le t\lt s_k\},
 \qquad
 \mathcal{V}_k
 =
-\{t:s_k\le t<s_k+W_{test}\}.
+\{t:s_k\le t\lt s_k+W_{test}\}.
 ```
 
 For an expanding window, the training set starts at the first observation and grows:
@@ -71,11 +71,11 @@ For an expanding window, the training set starts at the first observation and gr
 ```math
 \mathcal{T}^{exp}_k
 =
-\{t:t_0\le t<s_k\},
+\{t:t_0\le t\lt s_k\},
 \qquad
 \mathcal{V}_k
 =
-\{t:s_k\le t<s_k+W_{test}\}.
+\{t:s_k\le t\lt s_k+W_{test}\}.
 ```
 
 The main configuration uses $W_{train}=3$ years and $W_{test}=1$ year. Rolling windows emphasize recent market regimes; expanding windows emphasize maximal historical information.
@@ -576,7 +576,7 @@ The annualized Sortino ratio replaces total volatility by downside volatility:
 Sortino
 =
 \sqrt{252}
-\frac{\mathbb{E}[r_t^{strat}-r_f/252]}{\mathrm{Std}\left((r_t^{strat}-r_f/252)\mathbf{1}_{r_t^{strat}<r_f/252}\right)}.
+\frac{\mathbb{E}[r_t^{strat}-r_f/252]}{\mathrm{Std}\left((r_t^{strat}-r_f/252)\mathbf{1}_{r_t^{strat}\lt r_f/252}\right)}.
 ```
 
 Forecast differences are tested with the Diebold-Mariano statistic. For two models with errors $e_{1,t}=y_t-\hat{y}_{1,t}$ and $e_{2,t}=y_t-\hat{y}_{2,t}$, define squared-error loss differential
@@ -687,4 +687,3 @@ where the gating weights $g_t^{(i)}$ depend on market volatility, model confiden
 [`rolling/`](rolling) contains rolling-window results: trained outputs, saved autoencoder models, comparison metrics, Diebold-Mariano matrices, cleaned summaries, and final plots.
 
 [`expanding/`](expanding) contains expanding-window results: trained outputs, comparison metrics, Diebold-Mariano matrices, cleaned summaries, and final plots.
-
