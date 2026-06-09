@@ -189,7 +189,7 @@ and minimizes negative annualized Sharpe:
 \frac{
 \mathbb{E}[r^{strat}_t-r_f/252]
 }{
-\operatorname{Std}(r^{strat}_t-r_f/252)+\varepsilon
+\mathrm{Std}(r^{strat}_t-r_f/252)+\varepsilon
 }.
 ```
 
@@ -202,13 +202,13 @@ The FeedForward model is a nonlinear regression baseline. It receives $u_t$ and 
 ```math
 h_1
 =
-\operatorname{ReLU}(W_1u_t+b_1),
+\mathrm{ReLU}(W_1u_t+b_1),
 ```
 
 ```math
 h_2
 =
-\operatorname{ReLU}(W_2h_1+b_2),
+\mathrm{ReLU}(W_2h_1+b_2),
 ```
 
 ```math
@@ -224,7 +224,7 @@ Dropout is applied between layers:
 =
 m_\ell\odot h_\ell,
 \qquad
-m_{\ell,i}\sim\operatorname{Bernoulli}(1-r),
+m_{\ell,i}\sim\mathrm{Bernoulli}(1-r),
 ```
 
 where $r$ is the dropout rate. This model can learn nonlinear interactions between contemporaneous features and lagged returns, but it has no internal memory. All time dependence must be explicitly placed into $u_t$ through lagged variables.
@@ -322,7 +322,7 @@ and scaled dot-product attention is
 ```math
 A(Q,K,V)
 =
-\operatorname{softmax}
+\mathrm{softmax}
 \left(
 \frac{QK^\top}{\sqrt{d_k}}
 \right)V.
@@ -331,9 +331,9 @@ A(Q,K,V)
 Multi-head attention is
 
 ```math
-\operatorname{MHA}(X)
+\mathrm{MHA}(X)
 =
-\operatorname{Concat}(A_1,\ldots,A_H)W_O.
+\mathrm{Concat}(A_1,\ldots,A_H)W_O.
 ```
 
 Each encoder layer applies attention, residual connections, normalization, and a pointwise feed-forward block:
@@ -341,13 +341,13 @@ Each encoder layer applies attention, residual connections, normalization, and a
 ```math
 X'
 =
-\operatorname{LayerNorm}(X+\operatorname{MHA}(X)),
+\mathrm{LayerNorm}(X+\mathrm{MHA}(X)),
 ```
 
 ```math
 X''
 =
-\operatorname{LayerNorm}(X'+FFN(X')).
+\mathrm{LayerNorm}(X'+FFN(X')).
 ```
 
 The final prediction uses the encoded last time step. This architecture can directly compare all dates in the input window, so it can learn nonlocal temporal relationships. Its weakness in this study is sensitivity to the amount and type of historical data.
@@ -371,7 +371,7 @@ With activation and pooling,
 ```math
 a_{c,\tau}
 =
-\operatorname{ReLU}(z_{c,\tau}),
+\mathrm{ReLU}(z_{c,\tau}),
 \qquad
 m_{c,r}
 =
@@ -419,22 +419,22 @@ This gives a wide receptive field without requiring recurrence. A temporal block
 ```math
 F_\ell(x)
 =
-\operatorname{Dropout}
+\mathrm{Dropout}
 \left(
-\operatorname{GroupNorm}
+\mathrm{GroupNorm}
 \left(
-\operatorname{ReLU}
+\mathrm{ReLU}
 \left(
-\operatorname{Conv}^{d_\ell}(x)
+\mathrm{Conv}^{d_\ell}(x)
 \right)
 \right)
 \right),
 ```
 
 ```math
-\operatorname{Block}_\ell(x)
+\mathrm{Block}_\ell(x)
 =
-\operatorname{ReLU}(F_\ell(F_\ell(x))+R_\ell(x)).
+\mathrm{ReLU}(F_\ell(F_\ell(x))+R_\ell(x)).
 ```
 
 Here $R_\ell(x)=x$ if the dimensions match and otherwise a $1\times1$ convolution. This model is designed to preserve temporal order, avoid future leakage, and learn both short- and medium-range temporal structure.
@@ -471,7 +471,7 @@ An LSTM processes the enriched sequence:
 ```math
 h_\tau^{LSTM}
 =
-\operatorname{LSTM}(\tilde{v}_\tau,h_{\tau-1}^{LSTM}).
+\mathrm{LSTM}(\tilde{v}_\tau,h_{\tau-1}^{LSTM}).
 ```
 
 Multi-head attention then fuses temporal information:
@@ -479,7 +479,7 @@ Multi-head attention then fuses temporal information:
 ```math
 a_\tau
 =
-\operatorname{MHA}
+\mathrm{MHA}
 (h_\tau^{LSTM}).
 ```
 
@@ -488,13 +488,13 @@ The final layers use residual normalization and a feed-forward block:
 ```math
 r_\tau
 =
-\operatorname{LayerNorm}(a_\tau+h_\tau^{LSTM}),
+\mathrm{LayerNorm}(a_\tau+h_\tau^{LSTM}),
 ```
 
 ```math
 q_\tau
 =
-\operatorname{LayerNorm}(FFN(r_\tau)+r_\tau),
+\mathrm{LayerNorm}(FFN(r_\tau)+r_\tau),
 ```
 
 ```math
@@ -538,9 +538,9 @@ HR
 \sum_{t=1}^{n}
 \mathbf{1}
 \left[
-\operatorname{sign}(\hat{y}_t)
+\mathrm{sign}(\hat{y}_t)
 =
-\operatorname{sign}(y_t)
+\mathrm{sign}(y_t)
 \right].
 ```
 
@@ -566,7 +566,7 @@ SR
 \frac{
 \mathbb{E}[r_t^{strat}-r_f/252]
 }{
-\operatorname{Std}(r_t^{strat})
+\mathrm{Std}(r_t^{strat})
 }.
 ```
 
@@ -579,7 +579,7 @@ Sortino
 \frac{
 \mathbb{E}[r_t^{strat}-r_f/252]
 }{
-\operatorname{Std}
+\mathrm{Std}
 \left(
 (r_t^{strat}-r_f/252)
 \mathbf{1}_{r_t^{strat}<r_f/252}
@@ -599,7 +599,7 @@ The test statistic is
 DM
 =
 \frac{\bar{d}}
-{\sqrt{\widehat{\operatorname{Var}}(\bar{d})}},
+{\sqrt{\widehat{\mathrm{Var}}(\bar{d})}},
 \qquad
 \bar{d}
 =
@@ -609,7 +609,7 @@ DM
 The variance estimate uses autocovariances of $d_t$, corresponding to a Newey-West/HAC correction for forecast horizon $h$:
 
 ```math
-\widehat{\operatorname{Var}}(\bar{d})
+\widehat{\mathrm{Var}}(\bar{d})
 =
 \frac{1}{n}
 \left(
