@@ -8,31 +8,31 @@ The written project document is [`SQT-3.pdf`](SQT-3.pdf), titled *Investments: M
 
 The supervised learning task is one-step-ahead S&P 500 return forecasting. For each date $t$, the data contains a target return
 
-$$
+```math
 y_t \in \mathbb{R}
-$$
+```
 
 and a feature vector
 
-$$
+```math
 x_t \in \mathbb{R}^{22}.
-$$
+```
 
 The feature set combines market, macroeconomic, technical, volatility, commodity, FX, international index, and Google Trends variables. The model forecasts
 
-$$
+```math
 \hat{y}_t = f_\theta(\mathcal{I}_t),
-$$
+```
 
 where $\mathcal{I}_t$ is the information set available before predicting $y_t$. For non-sequential models this is mainly the current feature vector plus autoregressive return lags; for sequential models it is a window of past observations.
 
 Two input regimes are tested:
 
-$$
+```math
 \text{raw features: } \tilde{x}_t,
 \qquad
 \text{autoencoder features: } z_t = E_\phi(\tilde{x}_t).
-$$
+```
 
 The six forecasting architectures are FeedForward, LSTM, Transformer, CNN, Temporal Convolutional Network (TCN), and Temporal Fusion Transformer (TFT). Each is trained under both rolling and expanding validation.
 
@@ -42,11 +42,11 @@ The six forecasting architectures are FeedForward, LSTM, Transformer, CNN, Tempo
 
 Features are standardized inside each fold, using only the training sample:
 
-$$
+```math
 \tilde{x}_{t,j}
 =
 \frac{x_{t,j}-\mu^{train}_j}{\sigma^{train}_j}.
-$$
+```
 
 The fitted training scaler is then applied to the corresponding test fold. This is essential: using a global scaler would leak future distributional information into the training stage.
 
@@ -56,7 +56,7 @@ The study uses chronological validation rather than random cross-validation. Thi
 
 For a rolling window, the training window has fixed length and moves forward:
 
-$$
+```math
 \mathcal{T}^{roll}_k
 =
 \{t:s_k-W_{train}\le t<s_k\},
@@ -64,11 +64,11 @@ $$
 \mathcal{V}_k
 =
 \{t:s_k\le t<s_k+W_{test}\}.
-$$
+```
 
 For an expanding window, the training set starts at the first observation and grows:
 
-$$
+```math
 \mathcal{T}^{exp}_k
 =
 \{t:t_0\le t<s_k\},
@@ -76,7 +76,7 @@ $$
 \mathcal{V}_k
 =
 \{t:s_k\le t<s_k+W_{test}\}.
-$$
+```
 
 The main configuration uses $W_{train}=3$ years and $W_{test}=1$ year. Rolling windows emphasize recent market regimes; expanding windows emphasize maximal historical information.
 
@@ -86,25 +86,25 @@ The main configuration uses $W_{train}=3$ years and $W_{test}=1$ year. Rolling w
 
 Let $p$ be the number of autoregressive return lags and $L$ the sequence length. For the FeedForward model the input is
 
-$$
+```math
 u_t
 =
 \left[
 \tilde{x}_t,\,
 y_{t-1},\ldots,y_{t-p}
 \right].
-$$
+```
 
 For sequence models, the input tensor is
 
-$$
+```math
 U_t
 =
 \left[
 u_{t-L},u_{t-L+1},\ldots,u_{t-1}
 \right]
 \in \mathbb{R}^{L\times d},
-$$
+```
 
 where each $u_\tau$ contains features and padded autoregressive return information. The forecast is produced from this historical block.
 
@@ -112,21 +112,21 @@ where each $u_\tau$ contains features and padded autoregressive return informati
 
 The autoencoder tests whether a lower-dimensional learned representation improves forecasting. The encoder maps standardized features to latent factors,
 
-$$
+```math
 z_t = E_\phi(\tilde{x}_t),
 \qquad
 z_t\in\mathbb{R}^{q},
-$$
+```
 
 with $q=10$ in the main experiments. The decoder reconstructs the standardized feature vector:
 
-$$
+```math
 \hat{x}_t = D_\psi(z_t).
-$$
+```
 
 The autoencoder is trained only on the training fold:
 
-$$
+```math
 \min_{\phi,\psi}
 \frac{1}{n}
 \sum_{t\in\mathcal{T}}
@@ -135,7 +135,7 @@ $$
 -
 D_\psi(E_\phi(\tilde{x}_t))
 \right\|_2^2.
-$$
+```
 
 After training, only $E_\phi$ is used. The forecasting model receives $z_t$ instead of $\tilde{x}_t$. Mathematically, this replaces the original feature space by a learned nonlinear factor space. Qualitatively, it can remove noise and redundancy, but it can also suppress useful extreme-signal variation.
 
@@ -143,17 +143,17 @@ After training, only $E_\phi$ is used. The forecasting model receives $z_t$ inst
 
 The main supervised objective is mean squared error:
 
-$$
+```math
 \mathcal{L}_{MSE}(\theta)
 =
 \frac{1}{n}
 \sum_{t\in\mathcal{T}}
 (y_t-\hat{y}_t)^2.
-$$
+```
 
 The pipeline also supports ElasticNet regularization:
 
-$$
+```math
 \mathcal{L}(\theta)
 =
 \mathcal{L}_{MSE}(\theta)
@@ -164,25 +164,25 @@ $$
 +
 (1-\rho)\|\theta\|_2^2
 \right).
-$$
+```
 
 The L1 term encourages sparse weights and therefore implicit feature selection. The L2 term shrinks weights continuously, reducing sensitivity to single noisy variables. This matters in financial prediction because many indicators are correlated and their relationships with returns are unstable.
 
 The code also contains a Sharpe-ratio loss experiment. It converts forecasts into positions
 
-$$
+```math
 p_t=\tanh(\hat{y}_t),
-$$
+```
 
 strategy returns
 
-$$
+```math
 r^{strat}_t=p_ty_t,
-$$
+```
 
 and minimizes negative annualized Sharpe:
 
-$$
+```math
 \mathcal{L}_{Sharpe}
 =
 -
@@ -191,7 +191,7 @@ $$
 }{
 \operatorname{Std}(r^{strat}_t-r_f/252)+\varepsilon
 }.
-$$
+```
 
 The final experiments use MSE as the training loss because direct Sharpe optimization was less stable.
 
@@ -199,33 +199,33 @@ The final experiments use MSE as the training loss because direct Sharpe optimiz
 
 The FeedForward model is a nonlinear regression baseline. It receives $u_t$ and applies two hidden layers:
 
-$$
+```math
 h_1
 =
 \operatorname{ReLU}(W_1u_t+b_1),
-$$
+```
 
-$$
+```math
 h_2
 =
 \operatorname{ReLU}(W_2h_1+b_2),
-$$
+```
 
-$$
+```math
 \hat{y}_t
 =
 W_3h_2+b_3.
-$$
+```
 
 Dropout is applied between layers:
 
-$$
+```math
 \tilde{h}_\ell
 =
 m_\ell\odot h_\ell,
 \qquad
 m_{\ell,i}\sim\operatorname{Bernoulli}(1-r),
-$$
+```
 
 where $r$ is the dropout rate. This model can learn nonlinear interactions between contemporaneous features and lagged returns, but it has no internal memory. All time dependence must be explicitly placed into $u_t$ through lagged variables.
 
@@ -233,55 +233,55 @@ where $r$ is the dropout rate. This model can learn nonlinear interactions betwe
 
 The LSTM is designed for sequential dependence. For each time step in $U_t$, it updates a hidden state $h_\tau$ and cell state $c_\tau$. The gates are
 
-$$
+```math
 f_\tau
 =
 \sigma(W_f[u_\tau,h_{\tau-1}]+b_f),
-$$
+```
 
-$$
+```math
 i_\tau
 =
 \sigma(W_i[u_\tau,h_{\tau-1}]+b_i),
-$$
+```
 
-$$
+```math
 o_\tau
 =
 \sigma(W_o[u_\tau,h_{\tau-1}]+b_o),
-$$
+```
 
 and the candidate memory is
 
-$$
+```math
 \tilde{c}_\tau
 =
 \tanh(W_c[u_\tau,h_{\tau-1}]+b_c).
-$$
+```
 
 The cell and hidden states update as
 
-$$
+```math
 c_\tau
 =
 f_\tau\odot c_{\tau-1}
 +
 i_\tau\odot\tilde{c}_\tau,
-$$
+```
 
-$$
+```math
 h_\tau
 =
 o_\tau\odot\tanh(c_\tau).
-$$
+```
 
 The final forecast uses the last hidden state:
 
-$$
+```math
 \hat{y}_t
 =
 g_\theta(h_{t-1}).
-$$
+```
 
 The forget gate $f_\tau$ controls persistence of old information, the input gate $i_\tau$ controls entry of new information, and the output gate $o_\tau$ controls what part of memory becomes visible to the prediction head. This makes the LSTM suitable for momentum, mean-reversion, and volatility-regime patterns that depend on recent history.
 
@@ -289,13 +289,13 @@ The forget gate $f_\tau$ controls persistence of old information, the input gate
 
 The Transformer uses attention rather than recurrence. Each input vector is projected into a model dimension:
 
-$$
+```math
 e_\tau = W_eu_\tau+b_e.
-$$
+```
 
 Since attention alone has no natural ordering, sinusoidal positional encodings are added:
 
-$$
+```math
 PE_{pos,2i}
 =
 \sin\left(\frac{pos}{10000^{2i/d}}\right),
@@ -303,52 +303,52 @@ PE_{pos,2i}
 PE_{pos,2i+1}
 =
 \cos\left(\frac{pos}{10000^{2i/d}}\right).
-$$
+```
 
 The sequence representation is
 
-$$
+```math
 X_\tau=e_\tau+PE_\tau.
-$$
+```
 
 For one attention head,
 
-$$
+```math
 Q=XW_Q,\qquad K=XW_K,\qquad V=XW_V,
-$$
+```
 
 and scaled dot-product attention is
 
-$$
+```math
 A(Q,K,V)
 =
 \operatorname{softmax}
 \left(
 \frac{QK^\top}{\sqrt{d_k}}
 \right)V.
-$$
+```
 
 Multi-head attention is
 
-$$
+```math
 \operatorname{MHA}(X)
 =
 \operatorname{Concat}(A_1,\ldots,A_H)W_O.
-$$
+```
 
 Each encoder layer applies attention, residual connections, normalization, and a pointwise feed-forward block:
 
-$$
+```math
 X'
 =
 \operatorname{LayerNorm}(X+\operatorname{MHA}(X)),
-$$
+```
 
-$$
+```math
 X''
 =
 \operatorname{LayerNorm}(X'+FFN(X')).
-$$
+```
 
 The final prediction uses the encoded last time step. This architecture can directly compare all dates in the input window, so it can learn nonlocal temporal relationships. Its weakness in this study is sensitivity to the amount and type of historical data.
 
@@ -356,7 +356,7 @@ The final prediction uses the encoded last time step. This architecture can dire
 
 The CNN treats each feature sequence as a one-dimensional signal. A convolutional filter produces
 
-$$
+```math
 z_{c,\tau}
 =
 b_c
@@ -364,11 +364,11 @@ b_c
 \sum_{j=1}^{d}
 \sum_{k=0}^{K-1}
 w_{c,j,k}u_{\tau-k,j}.
-$$
+```
 
 With activation and pooling,
 
-$$
+```math
 a_{c,\tau}
 =
 \operatorname{ReLU}(z_{c,\tau}),
@@ -376,24 +376,24 @@ a_{c,\tau}
 m_{c,r}
 =
 \max_{\tau\in B_r} a_{c,\tau}.
-$$
+```
 
 The implementation stacks several convolutional layers, applies dropout, then uses adaptive average pooling:
 
-$$
+```math
 \bar{m}_c
 =
 \frac{1}{L'}
 \sum_{\tau=1}^{L'} a_{c,\tau}.
-$$
+```
 
 The forecast is linear in the pooled channels:
 
-$$
+```math
 \hat{y}_t
 =
 w^\top\bar{m}+b.
-$$
+```
 
 The CNN is useful for local temporal motifs: short bursts of volatility, short-term trend continuation, or local reversal patterns. It is less naturally suited to very long-range dependencies unless many layers or larger receptive fields are used.
 
@@ -401,22 +401,22 @@ The CNN is useful for local temporal motifs: short bursts of volatility, short-t
 
 The TCN is a causal convolutional model with dilation. Causality means the forecast at time $t$ never depends on future observations. A dilated convolution is
 
-$$
+```math
 z_\tau
 =
 \sum_{k=0}^{K-1}
 w_k u_{\tau-dk},
-$$
+```
 
 where $d$ is the dilation factor. In the implementation, dilation grows by layer:
 
-$$
+```math
 d_\ell=2^\ell.
-$$
+```
 
 This gives a wide receptive field without requiring recurrence. A temporal block applies two dilated causal convolutions, nonlinearities, normalization, dropout, and a residual connection:
 
-$$
+```math
 F_\ell(x)
 =
 \operatorname{Dropout}
@@ -429,13 +429,13 @@ F_\ell(x)
 \right)
 \right)
 \right),
-$$
+```
 
-$$
+```math
 \operatorname{Block}_\ell(x)
 =
 \operatorname{ReLU}(F_\ell(F_\ell(x))+R_\ell(x)).
-$$
+```
 
 Here $R_\ell(x)=x$ if the dimensions match and otherwise a $1\times1$ convolution. This model is designed to preserve temporal order, avoid future leakage, and learn both short- and medium-range temporal structure.
 
@@ -443,63 +443,63 @@ Here $R_\ell(x)=x$ if the dimensions match and otherwise a $1\times1$ convolutio
 
 The implemented TFT is a simplified hybrid architecture combining feature selection, recurrent processing, static enrichment, and attention. It first maps raw inputs to selected hidden features:
 
-$$
+```math
 v_\tau = V_\theta(u_\tau).
-$$
+```
 
 The code uses a learned variable-selection network rather than a fixed hand-selected subset. In principle this lets the model assign different effective weights to indicators depending on their predictive usefulness.
 
 Static context is approximated by the average hidden representation over the window:
 
-$$
+```math
 s
 =
 \frac{1}{L}
 \sum_{\tau=t-L}^{t-1}v_\tau,
 \qquad
 \bar{s}=W_ss+b_s.
-$$
+```
 
 The enriched temporal input is
 
-$$
+```math
 \tilde{v}_\tau=v_\tau+\bar{s}.
-$$
+```
 
 An LSTM processes the enriched sequence:
 
-$$
+```math
 h_\tau^{LSTM}
 =
 \operatorname{LSTM}(\tilde{v}_\tau,h_{\tau-1}^{LSTM}).
-$$
+```
 
 Multi-head attention then fuses temporal information:
 
-$$
+```math
 a_\tau
 =
 \operatorname{MHA}
 (h_\tau^{LSTM}).
-$$
+```
 
 The final layers use residual normalization and a feed-forward block:
 
-$$
+```math
 r_\tau
 =
 \operatorname{LayerNorm}(a_\tau+h_\tau^{LSTM}),
-$$
+```
 
-$$
+```math
 q_\tau
 =
 \operatorname{LayerNorm}(FFN(r_\tau)+r_\tau),
-$$
+```
 
-$$
+```math
 \hat{y}_t=g_\theta(q_{t-1}).
-$$
+```
 
 This model can combine sequential memory from the LSTM with direct temporal comparison from attention. In the empirical results, this matters because TFT forecasts without autoencoder preprocessing are more reactive to large market moves than the smoother low-MSE models.
 
@@ -507,31 +507,31 @@ This model can combine sequential memory from the LSTM with direct temporal comp
 
 Point-forecast quality is measured by
 
-$$
+```math
 MAE
 =
 \frac{1}{n}\sum_{t=1}^{n}|y_t-\hat{y}_t|,
-$$
+```
 
-$$
+```math
 RMSE
 =
 \sqrt{
 \frac{1}{n}\sum_{t=1}^{n}(y_t-\hat{y}_t)^2
 },
-$$
+```
 
-$$
+```math
 R^2
 =
 1-
 \frac{\sum_t(y_t-\hat{y}_t)^2}
 {\sum_t(y_t-\bar{y})^2}.
-$$
+```
 
 The directional hit rate is
 
-$$
+```math
 HR
 =
 \frac{1}{n}
@@ -542,11 +542,11 @@ HR
 =
 \operatorname{sign}(y_t)
 \right].
-$$
+```
 
 Trading diagnostics use position sizing
 
-$$
+```math
 p_t
 =
 \tanh
@@ -555,11 +555,11 @@ p_t
 \right),
 \qquad
 r_t^{strat}=p_ty_t.
-$$
+```
 
 The annualized Sharpe ratio is
 
-$$
+```math
 SR
 =
 \sqrt{252}
@@ -568,11 +568,11 @@ SR
 }{
 \operatorname{Std}(r_t^{strat})
 }.
-$$
+```
 
 The annualized Sortino ratio replaces total volatility by downside volatility:
 
-$$
+```math
 Sortino
 =
 \sqrt{252}
@@ -585,17 +585,17 @@ Sortino
 \mathbf{1}_{r_t^{strat}<r_f/252}
 \right)
 }.
-$$
+```
 
 Forecast differences are tested with the Diebold-Mariano statistic. For two models with errors $e_{1,t}=y_t-\hat{y}_{1,t}$ and $e_{2,t}=y_t-\hat{y}_{2,t}$, define squared-error loss differential
 
-$$
+```math
 d_t=e_{1,t}^2-e_{2,t}^2.
-$$
+```
 
 The test statistic is
 
-$$
+```math
 DM
 =
 \frac{\bar{d}}
@@ -604,11 +604,11 @@ DM
 \bar{d}
 =
 \frac{1}{n}\sum_{t=1}^{n}d_t.
-$$
+```
 
 The variance estimate uses autocovariances of $d_t$, corresponding to a Newey-West/HAC correction for forecast horizon $h$:
 
-$$
+```math
 \widehat{\operatorname{Var}}(\bar{d})
 =
 \frac{1}{n}
@@ -616,7 +616,7 @@ $$
 \hat{\gamma}_0
 +2\sum_{k=1}^{h-1}\hat{\gamma}_k
 \right).
-$$
+```
 
 Small p-values mean the two models have statistically distinguishable forecast losses.
 
@@ -649,7 +649,7 @@ The Diebold-Mariano tests show that most model pairs have statistically differen
 
 The central conclusion is therefore a trade-off. LSTM + Autoencoder is the best statistical forecaster by MSE. TFT without autoencoder is more informative about volatility and extreme regimes. The natural extension is a mixture model
 
-$$
+```math
 \hat{y}_t
 =
 \sum_{i=1}^{N}
@@ -658,7 +658,7 @@ g_t^{(i)}\hat{y}_t^{(i)},
 \sum_{i=1}^{N}g_t^{(i)}=1,
 \qquad
 g_t^{(i)}\ge 0,
-$$
+```
 
 where the gating weights $g_t^{(i)}$ depend on market volatility, model confidence, and recent model performance. This would let stable models dominate calm periods and reactive models receive more weight in stressed regimes.
 
